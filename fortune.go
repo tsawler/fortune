@@ -12,11 +12,13 @@ const url = "https://fortunecookieapi.herokuapp.com/v1/fortunes"
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
+// Fortune is the type to hold a fortune
 type Fortune struct {
 	ID      string `json:"id"`
 	Message string `json:"message"`
 }
 
+// allFortunes gets all fortunes as a slice
 func allFortunes() ([]Fortune, error) {
 	var fortuneSlice []Fortune
 
@@ -37,6 +39,7 @@ func allFortunes() ([]Fortune, error) {
 	return fortuneSlice, nil
 }
 
+// RandomFortune returns one fortune and an error, if any
 func RandomFortune() (string, error) {
 	var af Fortune
 
@@ -50,6 +53,8 @@ func RandomFortune() (string, error) {
 
 	fortuneToGet := fortuneSlice[randomFortuneID]
 
+	// we actually have everything we need by this point, but will get get one fortune by
+	// id just to demonstrate that the http client can be used more than once
 	af, err = getFortuneByID(fortuneToGet.ID)
 	if err != nil {
 		return "", err
@@ -58,6 +63,7 @@ func RandomFortune() (string, error) {
 	return af.Message, nil
 }
 
+// getFortuneByID gets one fortune by ID
 func getFortuneByID(id string) (Fortune, error) {
 	var fortune Fortune
 

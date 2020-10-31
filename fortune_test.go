@@ -24,6 +24,7 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 	}
 }
 
+// TestRandomFortune tests getting one fortune
 func TestRandomFortune(t *testing.T) {
 	client := NewTestClient(func(req *http.Request) *http.Response {
 

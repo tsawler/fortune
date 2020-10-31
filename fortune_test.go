@@ -2,12 +2,8 @@ package fortune
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
-	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -17,62 +13,53 @@ func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req), nil
 }
 
-//NewTestClient returns *http.Client with Transport replaced to avoid making real calls
+var tests = []struct {
+	name       string
+	url        string
+	statusCode int
+	json       string
+	want       string
+	errIsNil   bool
+}{
+	{"Good json response", "https://example.com", 200, `[{"message": "A","id": "5"}]`, "A", true},
+	{"Empty json response", "https://example.com", 200, "[]", "", true},
+	{"Bad json", "https://example.com", 200, `I am not json`, "", true},
+	{"Error 500", "not_a_valid_url", 500, "", "", false},
+}
+
+// NewTestClient returns *http.Client with Transport replaced to avoid making real calls
 func NewTestClient(fn RoundTripFunc) *http.Client {
 	return &http.Client{
-		Transport: RoundTripFunc(fn),
+		Transport: fn,
 	}
 }
 
-// TestRandomFortune tests getting one fortune
-func TestRandomFortune(t *testing.T) {
-	client := NewTestClient(func(req *http.Request) *http.Response {
+// TestGetFortunes handles table tests
+func TestGetFortunes(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := NewTestClient(func(req *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: tt.statusCode,
+					Body:       ioutil.NopCloser(bytes.NewBufferString(tt.json)),
+					Header:     make(http.Header),
+				}
+			})
 
-		return &http.Response{
-			StatusCode: 200,
-			Body: ioutil.NopCloser(bytes.NewBufferString(`
-[
-   {
-      "message": "A friend's frown is better than a fool's smile.",
-      "id": "5403c81dc2fea4020029ab34"
-   }
-]
-`)),
-			Header: make(http.Header),
-		}
-	})
+			t.Log("Creating client with url", tt.url)
+			api := API{client, tt.url}
 
-	api := API{client, "http://example.com"}
-	body, err := api.RandomFortune()
+			got, err := api.RandomFortune()
+			if got != tt.want {
+				t.Errorf("RandomFortune() got %v, want %v", got, tt.want)
+			}
 
-	ok(t, err)
-	equals(t, "A friend's frown is better than a fool's smile.", body)
-
-}
-
-// assert fails the test if the condition is false.
-func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {
-	if !condition {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: "+msg+"\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
-		tb.FailNow()
-	}
-}
-
-// ok fails the test if an err is not nil.
-func ok(tb testing.TB, err error) {
-	if err != nil {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: unexpected error: %s\033[39m\n\n", filepath.Base(file), line, err.Error())
-		tb.FailNow()
-	}
-}
-
-// equals fails the test if exp is not equal to act.
-func equals(tb testing.TB, exp, act interface{}) {
-	if !reflect.DeepEqual(exp, act) {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
-		tb.FailNow()
+			t.Log("isErr is", tt.errIsNil, "for", tt.name, "and err is", err)
+			if !tt.errIsNil {
+				if err == nil {
+					t.Errorf("expected error for %s, but err is nil", tt.name)
+				}
+			}
+		})
 	}
 }

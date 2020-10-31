@@ -2,6 +2,7 @@ package fortune
 
 import (
 	"encoding/json"
+	"errors"
 	"math/rand"
 	"net/http"
 	"time"
@@ -50,6 +51,10 @@ func (api *API) RandomFortune() (string, error) {
 
 	// seed our pseudo random generator
 	rand.Seed(time.Now().UnixNano())
+
+	if len(fortuneSlice) == 0 {
+		return "", errors.New("no fortunes returned from API")
+	}
 
 	// get a random fortune from slice
 	myFortune := fortuneSlice[rand.Intn(len(fortuneSlice))]

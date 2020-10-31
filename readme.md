@@ -12,15 +12,17 @@ go get -u github.com/tsawler/fortune
 
 Usage:
 
-```go
+~~~go
 package main
 
 import (
 	"fmt"
-	"github.com/tsawler/fortune"
 	"log"
 	"net/http"
 	"time"
+
+    "github.com/tsawler/fortune"
+
 )
 
 func main() {
@@ -35,5 +37,4 @@ func main() {
 	}
 	fmt.Println(theFortune)
 }
-
-```
+~~~

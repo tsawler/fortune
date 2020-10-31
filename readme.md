@@ -12,7 +12,7 @@ go get -u github.com/tsawler/fortune
 
 Usage:
 
-```
+```go
 package main
 
 import (

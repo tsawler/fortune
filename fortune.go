@@ -11,6 +11,11 @@ const url = "https://fortunecookieapi.herokuapp.com/v1/fortunes"
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
+type API struct {
+	Client *http.Client
+	Url    string
+}
+
 // Fortune is the type to hold a fortune
 type Fortune struct {
 	ID      string `json:"id"`
@@ -18,7 +23,7 @@ type Fortune struct {
 }
 
 // allFortunes gets all fortunes as a slice
-func allFortunes() ([]Fortune, error) {
+func (api *API) allFortunes() ([]Fortune, error) {
 	var fortuneSlice []Fortune
 
 	resp, err := myClient.Get(url)
@@ -39,9 +44,9 @@ func allFortunes() ([]Fortune, error) {
 }
 
 // RandomFortune returns one fortune and an error, if any
-func RandomFortune() (string, error) {
+func (api *API) RandomFortune() (string, error) {
 	// call allFortunes to get all fortunes into a slice
-	fortuneSlice, err := allFortunes()
+	fortuneSlice, err := api.allFortunes()
 	if err != nil {
 		return "", err
 	}

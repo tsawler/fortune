@@ -7,10 +7,7 @@ import (
 	"time"
 )
 
-//const url = "https://fortunecookieapi.herokuapp.com/v1/fortunes"
-//
-//var myClient = &http.Client{Timeout: 10 * time.Second}
-
+// API holds the http client and the url to call
 type API struct {
 	Client *http.Client
 	Url    string

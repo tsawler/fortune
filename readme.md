@@ -16,15 +16,24 @@ Usage:
 package main
 
 import (
+	"fmt"
 	"github.com/tsawler/fortune"
 	"log"
+	"net/http"
+	"time"
 )
 
 func main() {
-	myFortune, err := fortune.RandomFortune()
+	myFortune := fortune.API{
+		Client: &http.Client{Timeout: 10 * time.Second},
+		Url:    "https://fortunecookieapi.herokuapp.com/v1/fortunes",
+	}
+
+	theFortune, err := myFortune.RandomFortune()
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(myFortune)
+	fmt.Println(theFortune)
 }
+
 ```

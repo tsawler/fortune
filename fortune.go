@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-const url = "https://fortunecookieapi.herokuapp.com/v1/fortunes"
-
-var myClient = &http.Client{Timeout: 10 * time.Second}
+//const url = "https://fortunecookieapi.herokuapp.com/v1/fortunes"
+//
+//var myClient = &http.Client{Timeout: 10 * time.Second}
 
 type API struct {
 	Client *http.Client
@@ -26,7 +26,7 @@ type Fortune struct {
 func (api *API) allFortunes() ([]Fortune, error) {
 	var fortuneSlice []Fortune
 
-	resp, err := myClient.Get(url)
+	resp, err := api.Client.Get(api.Url)
 	if err != nil {
 		return fortuneSlice, err
 	}
